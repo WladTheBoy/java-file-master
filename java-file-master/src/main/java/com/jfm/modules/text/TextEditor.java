@@ -1,113 +1,139 @@
 package com.jfm.modules.text;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import org.fife.ui.rsyntaxtextarea.*;
+import org.fife.ui.rtextarea.RTextScrollPane;
 
 import com.jfm.util.SimpleDocumentListener;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 
 public class TextEditor extends JFrame {
 
-	private JTextArea textArea;
-	private File currentFile;
-	private boolean modified = false;
+    private RSyntaxTextArea textArea;
+    private File currentFile;
+    private boolean modified = false;
 
-	public TextEditor(File file) {
-		this.currentFile = file;
+    public TextEditor(File file) {
+        this.currentFile = file;
 
-		setTitle("Text Editor - " + file.getName());
-		setSize(700, 500);
-		setLocationRelativeTo(null);
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setTitle("Text Editor - " + file.getName());
+        setSize(800, 600);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		initUI();
-		loadFile(file);
+        initUI();
+        loadFile(file);
 
-		setVisible(true);
-	}
+        setVisible(true);
+    }
 
-	// ================= UI =================
-	private void initUI() {
-		textArea = new JTextArea();
-		textArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
-		textArea.setTabSize(4);
+    // ================= UI =================
+    private void initUI() {
+        textArea = new RSyntaxTextArea();
+        textArea.setFont(new Font("Consolas", Font.PLAIN, 14));
+        textArea.setTabSize(4);
+        textArea.setCodeFoldingEnabled(true);
+        textArea.setAntiAliasingEnabled(true);
 
-		textArea.getDocument().addDocumentListener(new SimpleDocumentListener(() -> {
-			modified = true;
-			updateTitle();
-		}));
+        detectSyntax(currentFile);
 
-		JScrollPane scrollPane = new JScrollPane(textArea);
-		add(scrollPane, BorderLayout.CENTER);
+        textArea.getDocument().addDocumentListener(
+                new SimpleDocumentListener(() -> {
+                    modified = true;
+                    updateTitle();
+                })
+        );
 
-		setJMenuBar(createMenuBar());
-	}
+        RTextScrollPane scrollPane = new RTextScrollPane(textArea);
+        scrollPane.setFoldIndicatorEnabled(true);
 
-	// ================= MENU =================
-	private JMenuBar createMenuBar() {
-		JMenuBar bar = new JMenuBar();
+        add(scrollPane, BorderLayout.CENTER);
+        setJMenuBar(createMenuBar());
+    }
 
-		JMenu fileMenu = new JMenu("File");
+    // ================= MENU =================
+    private JMenuBar createMenuBar() {
+        JMenuBar bar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
 
-		JMenuItem save = new JMenuItem("Save");
-		JMenuItem saveAs = new JMenuItem("Save As...");
+        JMenuItem save = new JMenuItem("Save");
+        JMenuItem saveAs = new JMenuItem("Save As");
 
-		save.addActionListener(e -> save());
-		saveAs.addActionListener(e -> saveAs());
+        save.addActionListener(e -> save());
+        saveAs.addActionListener(e -> saveAs());
 
-		fileMenu.add(save);
-		fileMenu.add(saveAs);
+        fileMenu.add(save);
+        fileMenu.add(saveAs);
+        bar.add(fileMenu);
 
-		bar.add(fileMenu);
-		return bar;
-	}
+        return bar;
+    }
 
-	// ================= LOAD =================
-	private void loadFile(File file) {
-		try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-			textArea.read(reader, null);
-			modified = false;
-			updateTitle();
-		} catch (IOException e) {
-			showError("Datei konnte nicht geladen werden.");
-		}
-	}
+    // ================= SYNTAX =================
+    private void detectSyntax(File file) {
+        String name = file.getName().toLowerCase();
 
-	// ================= SAVE =================
-	private void save() {
-		if (currentFile == null) {
-			saveAs();
-			return;
-		}
+        if (name.endsWith(".java")) {
+            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JAVA);
+        } else if (name.endsWith(".xml")) {
+            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_XML);
+        } else if (name.endsWith(".html")) {
+            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_HTML);
+        } else if (name.endsWith(".json")) {
+            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_JSON);
+        } else if (name.endsWith(".css")) {
+            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_CSS);
+        } else {
+            textArea.setSyntaxEditingStyle(SyntaxConstants.SYNTAX_STYLE_NONE);
+        }
+    }
 
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(currentFile))) {
-			textArea.write(writer);
-			modified = false;
-			updateTitle();
-		} catch (IOException e) {
-			showError("Datei konnte nicht gespeichert werden.");
-		}
-	}
+    // ================= LOAD =================
+    private void loadFile(File file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            textArea.read(reader, null);
+            modified = false;
+            updateTitle();
+        } catch (IOException e) {
+            showError("Datei konnte nicht geladen werden.");
+        }
+    }
 
-	private void saveAs() {
-		JFileChooser chooser = new JFileChooser();
-		chooser.setSelectedFile(currentFile);
+    // ================= SAVE =================
+    private void save() {
+        if (currentFile == null) {
+            saveAs();
+            return;
+        }
 
-		if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-			currentFile = chooser.getSelectedFile();
-			save();
-		}
-	}
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(currentFile))) {
+            textArea.write(writer);
+            modified = false;
+            updateTitle();
+        } catch (IOException e) {
+            showError("Datei konnte nicht gespeichert werden.");
+        }
+    }
 
-	// ================= HELPERS =================
-	private void updateTitle() {
-		String star = modified ? "*" : "";
-		setTitle("Text Editor - " + currentFile.getName() + star);
-	}
+    private void saveAs() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setSelectedFile(currentFile);
 
-	private void showError(String msg) {
-		JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
-	}
+        if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            currentFile = chooser.getSelectedFile();
+            detectSyntax(currentFile);
+            save();
+        }
+    }
+
+    // ================= HELPERS =================
+    private void updateTitle() {
+        setTitle("Text Editor - " + currentFile.getName() + (modified ? "*" : ""));
+    }
+
+    private void showError(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 }
