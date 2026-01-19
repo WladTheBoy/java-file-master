@@ -13,16 +13,16 @@ public class FolderIconFactory {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-		// Farben
+		// Colors
 		Color main = new Color(255, 193, 7);
 		Color dark = new Color(230, 170, 0);
 		Color outline = new Color(120, 90, 0);
 
-		// 📂 Ordner-Deckel
+		// Folder-Top
 		g.setColor(dark);
 		g.fillRoundRect(size / 8, size / 4, size / 2, size / 4, 10, 10);
 
-		// 📂 Ordner-Körper
+		// Folder-Body
 		g.setColor(main);
 		g.fillRoundRect(size / 8, size / 3, size * 3 / 4, size / 2, 14, 14);
 
@@ -31,7 +31,7 @@ public class FolderIconFactory {
 		g.setStroke(new BasicStroke(2.5f));
 		g.drawRoundRect(size / 8, size / 3, size * 3 / 4, size / 2, 14, 14);
 
-		// ✍️ JFM Text
+		// JFM Text
 		String text = "JFM";
 		Font font = new Font("Arial", Font.BOLD, size / 4);
 		g.setFont(font);
@@ -43,7 +43,7 @@ public class FolderIconFactory {
 		int x = (size - textWidth) / 2;
 		int y = size / 2 + textHeight / 2;
 
-		// Text-Schatten (subtil)
+		// Text-Shadow (subtle)
 		g.setColor(new Color(0, 0, 0, 80));
 		g.drawString(text, x + 2, y + 2);
 
@@ -66,7 +66,7 @@ public class FolderIconFactory {
 		Color dark = new Color(230, 170, 0);
 		Color outline = new Color(120, 90, 0);
 
-		// Ordner
+		// Folder
 		g.setColor(dark);
 		g.fillRoundRect(size / 8, size / 4, size / 2, size / 4, 10, 10);
 
