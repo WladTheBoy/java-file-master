@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class FolderIconFactory {
-	// Icon
+	
 	public static ImageIcon createFolderIcon(int size) {
 		BufferedImage img = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g = img.createGraphics();
